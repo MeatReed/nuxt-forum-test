@@ -1,0 +1,1 @@
+# nuxt-forum-test
