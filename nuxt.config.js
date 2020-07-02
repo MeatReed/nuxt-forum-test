@@ -42,7 +42,7 @@ export default {
    */
   plugins: [
     { src: '~/plugins/axios', ssr: false },
-    { src: '~/plugins/vuetifyImageInput', ssr: false }
+    { src: '~/plugins/vuetifyImageInput', ssr: false },
   ],
   /*
    ** Auto import components

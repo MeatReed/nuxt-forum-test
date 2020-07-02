@@ -5,43 +5,33 @@ import atob from 'atob'
 
 const router = Router()
 
-router.post('/user', verifyToken, (req, res) => {
-  jwt.verify(req.token, process.env.SECRET, async (err) => {
-    if (err) {
-      return res.status(400)
-    } else if (req.body) {
-      const id = req.body.id
-      if (id) {
-        const dbUser = await req.mysql.query(
-          'SELECT id,role,email,show_email,username,description,created_at,edited_at FROM users WHERE id = ?',
-          [id]
-        )
-        if (dbUser[0][0]) {
-          return res.json({
-            id: dbUser[0][0].id,
-            role: dbUser[0][0].role,
-            email: dbUser[0][0].show_email === 0 ? null : dbUser[0][0].email,
-            username: dbUser[0][0].username,
-            description: dbUser[0][0].description,
-            created_at: dbUser[0][0].created_at,
-            edited_at: dbUser[0][0].edited_at,
-          })
-        } else {
-          return res.status(400).json({
-            error: 'Utilisateur introuvable !',
-          })
-        }
-      } else {
-        return res.status(400).json({
-          error: 'Une valeur est manquante.',
-        })
-      }
+router.post('/user', async (req, res) => {
+  const id = req.body.id
+  if (id) {
+    const dbUser = await req.mysql.query(
+      'SELECT id,role,email,show_email,username,description,created_at,edited_at FROM users WHERE id = ?',
+      [id]
+    )
+    if (dbUser[0][0]) {
+      return res.json({
+        id: dbUser[0][0].id,
+        role: dbUser[0][0].role,
+        email: dbUser[0][0].show_email === 0 ? null : dbUser[0][0].email,
+        username: dbUser[0][0].username,
+        description: dbUser[0][0].description,
+        created_at: dbUser[0][0].created_at,
+        edited_at: dbUser[0][0].edited_at,
+      })
     } else {
       return res.status(400).json({
-        error: "Aucune valeur n'a été entrée.",
+        error: 'Utilisateur introuvable !',
       })
     }
-  })
+  } else {
+    return res.status(400).json({
+      error: 'Une valeur est manquante.',
+    })
+  }
 })
 
 router.post('/user/edit', verifyToken, (req, res) => {
@@ -53,12 +43,11 @@ router.post('/user/edit', verifyToken, (req, res) => {
       const description = req.body.description
       const showEmail = req.body.showEmail
       const avatar = req.body.avatar
-      const editedat = req.body.edited_at
       let blobImage = null
       if (avatar) {
         blobImage = dataURIToBlob(req.body.avatar)
       }
-      if (user && decoded && editedat) {
+      if (user && decoded) {
         const userChange = await req.mysql.query(
           'SELECT * FROM users WHERE id = ?',
           [user.id]
@@ -72,7 +61,7 @@ router.post('/user/edit', verifyToken, (req, res) => {
                 : userChange[0][0].avatar_type,
               description,
               show_email: showEmail,
-              edited_at: editedat,
+              edited_at: new Date(),
             }
             await req.mysql.query('UPDATE users SET ? WHERE id = ?', [
               updateValues,
@@ -85,7 +74,6 @@ router.post('/user/edit', verifyToken, (req, res) => {
               avatar_type: blobImage ? blobImage.type : userChange[0][0].avatar,
               description,
               show_email: showEmail,
-              edited_at: editedat,
             }
             await req.mysql.query('UPDATE users SET ? WHERE id = ?', [
               updateValues,

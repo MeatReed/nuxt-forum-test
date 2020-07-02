@@ -1,7 +1,10 @@
 <template>
   <v-container>
     <v-row v-if="!$fetchState.pending">
-      <v-col v-if="user.id === this.$store.state.user.id">
+      <v-col v-if="!$store.state.user">
+        <h1>Mon compte</h1>
+      </v-col>
+      <v-col v-else-if="user.id === $store.state.user.id">
         <h1>Mon compte</h1>
       </v-col>
       <v-col v-else>
@@ -43,7 +46,10 @@
             <v-tab key="information">
               Information
             </v-tab>
-            <v-tab v-if="user.id === this.$store.state.user.id" key="edit">
+            <v-tab
+              v-if="$store.state.user && user.id === $store.state.user.id"
+              key="edit"
+            >
               Editer son profil
             </v-tab>
           </v-tabs>
@@ -196,7 +202,6 @@ export default {
             avatar: this.avatarEditData,
             showEmail: this.showEmailSwitch,
             user: this.user,
-            edited_at: new Date(),
           })
           .then((response) => {
             this.$fetch()
