@@ -41,6 +41,14 @@
               required
               type="password"
             ></v-text-field>
+            <v-select
+              v-model="genderRegister"
+              :rules="[(v) => !!v || 'Sexe obligatoire']"
+              :items="genderItems"
+              label="Sexe*"
+              item-text="name"
+              item-value="type"
+            ></v-select>
           </v-form>
         </v-container>
         <small>*champ obligatoire</small>
@@ -74,6 +82,17 @@ export default {
       usernameRegister: '',
       passwordRegister: '',
       passwordConfirmRegister: '',
+      genderRegister: null,
+      genderItems: [
+        {
+          name: 'Homme',
+          type: 'male',
+        },
+        {
+          name: 'Femme',
+          type: 'female',
+        },
+      ],
       snackbarShow: false,
     }
   },
@@ -83,7 +102,7 @@ export default {
       const passwordLength = (v) =>
         (v && v.length >= 3) ||
         "Le nom d'utilisateur doit comporter au moins de 3 caractères."
-      const requiert = (v) => !!v || 'Mot de passe obliatoire !'
+      const requiert = (v) => !!v || 'Mot de passe obligatoire !'
       rules.push(passwordLength)
       rules.push(requiert)
       return rules
@@ -93,7 +112,7 @@ export default {
       const usernameLength = (v) =>
         (v && v.length <= 15) ||
         "Le nom d'utilisateur doit comporter moins de 15 caractères."
-      const requiert = (v) => !!v || "Nom d'utilisateur obliatoire !"
+      const requiert = (v) => !!v || "Nom d'utilisateur obligatoire !"
       rules.push(usernameLength)
       rules.push(requiert)
       return rules
@@ -102,7 +121,7 @@ export default {
       const rules = []
       const emailValid = (v) =>
         /.+@.+\..+/.test(v) || "L'Email doit être valide !"
-      const requiert = (v) => !!v || 'Email obliatoire !'
+      const requiert = (v) => !!v || 'Email obligatoire !'
       rules.push(emailValid)
       rules.push(requiert)
       return rules
@@ -126,6 +145,7 @@ export default {
             username: this.usernameRegister,
             email: this.emailRegister,
             password: this.passwordRegister,
+            gender: this.genderRegister,
           })
           .then((response) => {
             this.dialogRegister = false

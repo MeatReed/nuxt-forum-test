@@ -30,13 +30,9 @@
           >
           </v-img>
           <v-card-title>{{ user.username }}</v-card-title>
-          <v-card-subtitle v-if="user.role === 3"
-            >Administrateur</v-card-subtitle
-          >
-          <v-card-subtitle v-else-if="user.role === 2"
-            >Modérateur</v-card-subtitle
-          >
-          <v-card-subtitle v-else>Utilisateur</v-card-subtitle>
+          <v-card-subtitle>{{
+            user.gender === 'male' ? role.male : role.female
+          }}</v-card-subtitle>
           <v-card-text>{{ user.description }}</v-card-text>
         </v-card>
       </v-col>
@@ -63,6 +59,9 @@
                       <p>PSEUDO</p>
                       <p>DESCRIPTION</p>
                       <p>EMAIL</p>
+                      <p>SEXE</p>
+                      <p>DATE DE CRÉATION</p>
+                      <p>EDITÉ LE</p>
                     </v-col>
                     <v-col lg="9">
                       <p>{{ user.username }}</p>
@@ -74,7 +73,9 @@
                         }}
                       </p>
                       <p>{{ user.email ? user.email : 'Email caché !' }}</p>
-                      <p>Pas disponible</p>
+                      <p>{{ user.gender === 'male' ? 'Homme' : 'Femme' }}</p>
+                      <p>{{ user.created_at }}</p>
+                      <p>{{ user.edited_at ? user.edited_at : 'Non édité' }}</p>
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -106,6 +107,13 @@
                           v-model="showEmailSwitch"
                           label="Afficher son email"
                         ></v-switch>
+                        <v-select
+                          v-model="gender"
+                          :items="genderItems"
+                          label="Sexe"
+                          item-text="name"
+                          item-value="type"
+                        ></v-select>
                       </v-form>
                     </v-col>
                   </v-row>
@@ -159,8 +167,17 @@ export default {
       }
     )
     this.user = userResponse
+    this.gender = userResponse.gender
     this.showEmailSwitch = !!userResponse.email
     this.descriptionEdit = userResponse.description
+    const roleResponse = await this.$axios.$post(
+      this.$axios.defaults.baseURL + `/api/userRole/`,
+      {
+        id: this.$route.params.id,
+        roleID: userResponse.role,
+      }
+    )
+    this.role = roleResponse
   },
   fetchOnServer: false,
   data: () => ({
@@ -170,19 +187,33 @@ export default {
     errorEditAlert: '',
     avatarEditData: null,
     user: null,
+    role: null,
     avatar: null,
     tab: null,
     snackbar: false,
     snackbarText: null,
     snackbarColor: null,
     descriptionEdit: null,
+    gender: null,
+    genderItems: [
+      {
+        name: 'Homme',
+        type: 'male',
+      },
+      {
+        name: 'Femme',
+        type: 'female',
+      },
+    ],
   }),
   computed: {
     descriptionRules() {
       const rules = []
 
+      if (this.descriptionEdit === null) return
+
       const descriptionLength = (v) =>
-        (v && v.length <= 200) ||
+        v.length <= 200 ||
         'Votre description de doit pas dépassé les 200 caractères !'
 
       rules.push(descriptionLength)
@@ -202,6 +233,7 @@ export default {
             avatar: this.avatarEditData,
             showEmail: this.showEmailSwitch,
             user: this.user,
+            gender: this.gender,
           })
           .then((response) => {
             this.$fetch()

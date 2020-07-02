@@ -9,7 +9,7 @@ router.post('/user', async (req, res) => {
   const id = req.body.id
   if (id) {
     const dbUser = await req.mysql.query(
-      'SELECT id,role,email,show_email,username,description,created_at,edited_at FROM users WHERE id = ?',
+      'SELECT id,role,email,show_email,username,description,created_at,edited_at,gender FROM users WHERE id = ?',
       [id]
     )
     if (dbUser[0][0]) {
@@ -21,6 +21,7 @@ router.post('/user', async (req, res) => {
         description: dbUser[0][0].description,
         created_at: dbUser[0][0].created_at,
         edited_at: dbUser[0][0].edited_at,
+        gender: dbUser[0][0].gender,
       })
     } else {
       return res.status(400).json({
@@ -40,9 +41,10 @@ router.post('/user/edit', verifyToken, (req, res) => {
       return res.status(400)
     } else if (req.body) {
       const user = req.body.user
-      const description = req.body.description
+      const description = req.body.description ? req.body.description : null
       const showEmail = req.body.showEmail
       const avatar = req.body.avatar
+      const gender = req.body.gender
       let blobImage = null
       if (avatar) {
         blobImage = dataURIToBlob(req.body.avatar)
@@ -62,6 +64,7 @@ router.post('/user/edit', verifyToken, (req, res) => {
               description,
               show_email: showEmail,
               edited_at: new Date(),
+              gender,
             }
             await req.mysql.query('UPDATE users SET ? WHERE id = ?', [
               updateValues,
@@ -74,6 +77,7 @@ router.post('/user/edit', verifyToken, (req, res) => {
               avatar_type: blobImage ? blobImage.type : userChange[0][0].avatar,
               description,
               show_email: showEmail,
+              gender,
             }
             await req.mysql.query('UPDATE users SET ? WHERE id = ?', [
               updateValues,

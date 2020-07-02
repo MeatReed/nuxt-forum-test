@@ -13,8 +13,9 @@ router.post('/register', async function (req, res, next) {
     const username = req.body.username
     const email = req.body.email
     const password = req.body.password
+    const gender = req.body.gender
 
-    if (email && password && username) {
+    if (email && password && username && gender) {
       const dbUserName = await req.mysql.query(
         'SELECT * FROM users WHERE username = ?',
         [username]
@@ -40,29 +41,32 @@ router.post('/register', async function (req, res, next) {
               avatar: dataURIToBlob(avatarDefault.base64).buffer,
               avatar_type: dataURIToBlob(avatarDefault.base64).type,
               created_at: new Date(),
+              gender,
             }
             const tokenJwt = jwt.sign(
               {
                 token: newUser.token,
                 role: newUser.role,
-                email: newUser.email,
-                username: newUser.username,
+                email,
+                username,
                 show_email: newUser.show_email,
                 password_encrypt: newUser.password_encrypt,
                 created_at: newUser.created_at,
+                gender,
               },
               process.env.SECRET
             )
             const newUserDb = await req.mysql.query('INSERT INTO users SET ?', {
               token: newUser.token,
               role: newUser.role,
-              email: newUser.email,
-              username: newUser.username,
+              email,
+              username,
               show_email: newUser.show_email,
               password_encrypt: newUser.password_encrypt,
               avatar: newUser.avatar,
               avatar_type: newUser.avatar_type,
               created_at: newUser.created_at,
+              gender,
             })
             const token = {
               tokenSession: tokenJwt,
@@ -72,19 +76,21 @@ router.post('/register', async function (req, res, next) {
               token,
               id: newUserDb[0].insertId,
               role: newUser.role,
-              email: newUser.email,
-              username: newUser.username,
+              email,
+              username,
               show_email: newUser.show_email,
               created_at: newUser.created_at,
+              gender,
             }
             return res.json({
               token,
               id: newUserDb[0].insertId,
               role: newUser.role,
-              email: newUser.email,
-              username: newUser.username,
+              email,
+              username,
               show_email: newUser.show_email,
               created_at: newUser.created_at,
+              gender,
             })
           })
         } else {
@@ -112,7 +118,7 @@ router.post('/register', async function (req, res, next) {
 router.post('/login', async (req, res) => {
   if (req.body.token) {
     const account = await req.mysql.query(
-      'SELECT token,id,role,email,show_email,username,password_encrypt,description,created_at,edited_at FROM users WHERE token = ?',
+      'SELECT token,id,role,email,show_email,username,password_encrypt,description,created_at,edited_at,gender FROM users WHERE token = ?',
       [req.body.token]
     )
     if (account[0][0]) {
@@ -127,6 +133,7 @@ router.post('/login', async (req, res) => {
         description: account[0][0].description,
         created_at: account[0][0].created_at,
         edited_at: account[0][0].edited_at,
+        gender: account[0][0].gender,
       }
       const tokenJwt = jwt.sign(user, process.env.SECRET)
       const token = {
@@ -143,6 +150,7 @@ router.post('/login', async (req, res) => {
         description: user.description,
         created_at: user.created_at,
         edited_at: user.edited_at,
+        gender: user.gender,
       }
       return res.json({
         token,
@@ -154,6 +162,7 @@ router.post('/login', async (req, res) => {
         description: user.description,
         created_at: user.created_at,
         edited_at: user.edited_at,
+        gender: user.gender,
       })
     } else {
       return res.status(400).json({
@@ -180,6 +189,7 @@ router.post('/login', async (req, res) => {
           description: account[0][0].description,
           created_at: account[0][0].created_at,
           edited_at: account[0][0].edited_at,
+          gender: account[0][0].gender,
         }
         bcrypt.compare(password, user.password_encrypt, function (err, result) {
           if (err)
@@ -202,6 +212,7 @@ router.post('/login', async (req, res) => {
               description: user.description,
               created_at: user.created_at,
               edited_at: user.edited_at,
+              gender: user.gender,
             }
             return res.json({
               token,
@@ -213,6 +224,7 @@ router.post('/login', async (req, res) => {
               description: user.description,
               created_at: user.created_at,
               edited_at: user.edited_at,
+              gender: user.gender,
             })
           } else {
             return res.status(400).json({
