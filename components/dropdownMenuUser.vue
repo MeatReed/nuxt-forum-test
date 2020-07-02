@@ -6,6 +6,9 @@
       </v-btn>
     </template>
     <v-list>
+      <v-list-item nuxt :to="'/user/' + $store.state.user.id">
+        <v-list-item-title>Profil</v-list-item-title>
+      </v-list-item>
       <v-list-item @click="logout">
         <v-list-item-title>Se déconnecter</v-list-item-title>
       </v-list-item>

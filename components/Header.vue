@@ -1,8 +1,6 @@
 <template>
   <div>
     <v-app-bar dense>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
       <v-toolbar-title>Nuxt Forum Test</v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -16,7 +14,9 @@
 
 <script>
 export default {
-  data() {},
+  data() {
+    return {}
+  },
 }
 </script>
 

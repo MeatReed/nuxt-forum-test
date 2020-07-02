@@ -22,8 +22,9 @@ router.use((req, res, next) => {
 })
 
 const auth = require('./controllers/auth')
+const users = require('./controllers/users')
 
-router.use(auth)
+router.use(auth, users)
 
 export default {
   path: '/api',

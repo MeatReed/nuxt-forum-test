@@ -25,7 +25,8 @@
     "nuxt": "^2.13.0",
     "randomstring": "^1.1.5",
     "slugify": "^1.4.4",
-    "uuid": "^8.2.0"
+    "uuid": "^8.2.0",
+    "vuetify-image-input": "^19.1.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^3.0.0",

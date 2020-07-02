@@ -46,4 +46,11 @@ export const actions = {
         commit('LOGOUT')
       })
   },
+  saveEdit({ commit }, data) {
+    return this.$axios
+      .$post(this.$axios.defaults.baseURL + '/api/user/edit', data)
+      .then((data) => {
+        return data
+      })
+  },
 }
