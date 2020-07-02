@@ -1,4 +1,7 @@
+import bodyParser from 'body-parser'
+import session from 'express-session'
 import colors from 'vuetify/es5/util/colors'
+require('dotenv').config()
 
 export default {
   /*
@@ -62,7 +65,17 @@ export default {
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  axios: {},
+  axios: {
+    baseURL: process.env.BASE_URL,
+  },
+  proxy: {
+    '/api': {
+      target: process.env.BASE_URL,
+      pathRewrite: {
+        '^/api': '/',
+      },
+    },
+  },
   /*
    ** vuetify module configuration
    ** https://github.com/nuxt-community/vuetify-module
@@ -70,7 +83,7 @@ export default {
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     theme: {
-      dark: true,
+      dark: false,
       themes: {
         dark: {
           primary: colors.blue.darken2,
@@ -89,4 +102,22 @@ export default {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {},
+  serverMiddleware: [
+    // body-parser middleware
+    bodyParser.json({ limit: '50mb' }),
+    bodyParser.urlencoded({
+      limit: '50mb',
+      extended: true,
+      parameterLimit: 10000000,
+    }),
+    session({
+      secret: process.env.SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: 8.64e7 },
+    }),
+    // Api middleware
+    // We add /api/login & /api/logout routes
+    '~/api',
+  ],
 }
